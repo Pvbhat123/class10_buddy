@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from supabase import create_client
+from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
@@ -12,11 +13,18 @@ app = Flask(__name__)
 # 1. Supabase connection
 # ---------------------------
 SUPABASE_URL = "https://lgcvwuazwdkrchxhvbcv.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnY3Z3dWF6d2RrcmNoeGh2YmN2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzM3MTgxOSwiZXhwIjoyMDc4OTQ3ODE5fQ.O6MPj2mePdwLb-G52ijDMgnIdFMU0NR41p6re0rRCAs"  # <-- Replace this soon, DO NOT expose publicly
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnY3Z3dWF6d2RrcmNoeGh2YmN2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzM3MTgxOSwiZXhwIjoyMDc4OTQ3ODE5fQ.O6MPj2mePdwLb-G52ijDMgnIdFMU0NR41p6re0rRCAs"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ---------------------------
-# 2. Gemini API setup
+# 2. Embedding Model (FREE & BETTER)
+# ---------------------------
+print("Loading embedding model...")
+embedding_model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+print("Embedding model loaded successfully!")
+
+# ---------------------------
+# 3. Gemini API setup
 # ---------------------------
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
@@ -46,14 +54,9 @@ def search():
 
     try:
         # ------------------------------------
-        # STEP 1 — Get Gemini embedding (light, fast)
+        # STEP 1 — Get embedding using SentenceTransformer (FREE & BETTER)
         # ------------------------------------
-        result = genai.embed_content(
-            model="models/text-embedding-004",
-            content=user_query,
-            task_type="retrieval_query"
-        )
-        query_embedding = result['embedding']
+        query_embedding = embedding_model.encode(user_query).tolist()
 
         # ------------------------------------
         # STEP 2 — Query Supabase Vector DB
