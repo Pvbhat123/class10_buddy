@@ -28,9 +28,6 @@ genai.configure(api_key=GEMINI_API_KEY)
 # Gemini text model
 gemini_model = genai.GenerativeModel('models/gemini-2.5-pro')
 
-# Gemini embedding model
-embedding_model = genai.GenerativeModel("models/text-embedding-004")
-
 print("Application initialized successfully.")
 
 
@@ -51,8 +48,12 @@ def search():
         # ------------------------------------
         # STEP 1 — Get Gemini embedding (light, fast)
         # ------------------------------------
-        embed = embedding_model.embed_content(user_query)
-        query_embedding = embed["embedding"]
+        result = genai.embed_content(
+            model="models/text-embedding-004",
+            content=user_query,
+            task_type="retrieval_query"
+        )
+        query_embedding = result['embedding']
 
         # ------------------------------------
         # STEP 2 — Query Supabase Vector DB
