@@ -1,7 +1,6 @@
 flask
 supabase
-langchain-huggingface
-sentence-transformers
-google-generativeai
 python-dotenv
+google-generativeai
 gunicorn
+
