@@ -3,4 +3,5 @@ supabase
 python-dotenv
 google-generativeai
 gunicorn
-
+sentence-transformers
+torch
