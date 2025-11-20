@@ -1,6 +1,9 @@
-flask
-supabase
-python-dotenv
-google-generativeai
-gunicorn
-
+flask==3.0.0
+supabase==2.3.0
+python-dotenv==1.0.0
+google-generativeai==0.3.2
+gunicorn==21.2.0
+langchain-huggingface==0.0.1
+sentence-transformers==2.3.1
+torch==2.1.2
+transformers==4.36.2
