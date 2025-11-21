@@ -4,6 +4,7 @@ python-dotenv==1.0.0
 google-generativeai==0.3.2
 gunicorn==21.2.0
 langchain-huggingface==0.0.1
-sentence-transformers
 torch==2.5.1
-transformers==4.36.2
+sentence-transformers
+transformers
+
