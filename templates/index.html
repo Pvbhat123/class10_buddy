@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class10 Buddy</title>
+
+    <!-- MathJax for rendering mathematical formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* ---- YOUR ORIGINAL CSS (unchanged) ---- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: clamp(10px, 2vw, 20px);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8em, 4vw + 1em, 2.5em);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: clamp(0.95em, 2vw + 0.5em, 1.1em);
+            opacity: 0.9;
+        }
+
+        .search-section { padding: clamp(20px, 3vw, 30px); }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #queryInput {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #queryInput:focus { border-color: #667eea; }
+
+        #searchBtn {
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #searchBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #searchBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .refined-answer {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .refined-answer-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .ai-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .refined-answer-title {
+            color: #667eea;
+            font-size: clamp(1.1em, 2vw + 0.6em, 1.3em);
+            font-weight: bold;
+        }
+
+        .refined-answer-content {
+            color: #333;
+            line-height: 1.8;
+            font-size: clamp(0.95em, 1.5vw + 0.5em, 1.05em);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Class10 Buddy</h1>
+            <p>Got a doubt? Just ask and get the correct explanation.</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="queryInput" placeholder="Type your question here..." autocomplete="off">
+                <button id="searchBtn">Search</button>
+            </div>
+
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const queryInput = document.getElementById('queryInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsDiv = document.getElementById('results');
+
+        async function search() {
+            const query = queryInput.value.trim();
+
+            if (!query) {
+                resultsDiv.innerHTML = '<div class="error">Please enter a question</div>';
+                return;
+            }
+
+            searchBtn.disabled = true;
+            resultsDiv.innerHTML = '<div class="loading">Searching and analyzing with AI...</div>';
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                    return;
+                }
+
+                let html = '';
+
+                /* ------------------------------
+                   🔥 UPDATED SECTION — SHOW IMAGE
+                ------------------------------ */
+
+                if (data.refined_answer) {
+                    html += `
+                        <div class="refined-answer">
+                            <div class="refined-answer-header">
+                                <span class="ai-badge">AI Answer</span>
+                                <span class="refined-answer-title">Refined Response</span>
+                            </div>
+
+                            <div class="refined-answer-content">
+                                ${markdownToHtml(data.refined_answer)}
+                            </div>
+
+                            ${data.image_url ? `
+                                <div style="text-align:center; margin-top:20px;">
+                                    <img 
+                                        src="${data.image_url}" 
+                                        alt="Diagram" 
+                                        style="
+                                            max-width: 80%;
+                                            height: auto;
+                                            border-radius: 12px;
+                                            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                                            margin-top: 15px;
+                                        "
+                                    />
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+
+                resultsDiv.innerHTML = html;
+
+                if (typeof MathJax !== 'undefined') {
+                    MathJax.typesetPromise([resultsDiv]).catch((err) => console.log('MathJax error:', err));
+                }
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
+
+        /* ---------- markdownToHtml() stays the SAME --------- */
+
+        function markdownToHtml(md) {
+            let html = md;
+
+            // Simple markdown rules
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/### (.*?)/g, '<h3>$1</h3>');
+            html = html.replace(/## (.*?)/g, '<h2>$1</h2>');
+            html = html.replace(/# (.*?)/g, '<h1>$1</h1>');
+            html = html.replace(/\n/g, '<br>');
+
+            return html;
+        }
+
+        searchBtn.addEventListener('click', search);
+        queryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') search();
+        });
+    </script>
+</body>
+</html>
