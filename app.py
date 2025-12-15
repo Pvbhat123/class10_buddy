@@ -13,13 +13,12 @@ app = Flask(__name__)
 # 1. HUGGINGFACE INFERENCE API FOR EMBEDDINGS
 # ---------------------------------------------
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
-HF_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
-HF_API_URL = f"https://router.huggingface.co/hf-inference/pipeline/feature-extraction/{HF_EMBEDDING_MODEL}"
+HF_API_URL = "https://router.huggingface.co/hf-inference/models/BAAI/bge-small-en-v1.5"
 
 def get_embedding(text):
     """Get embeddings using HuggingFace Inference API (free)"""
     headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
-    response = requests.post(HF_API_URL, headers=headers, json={"inputs": text, "options": {"wait_for_model": True}})
+    response = requests.post(HF_API_URL, headers=headers, json={"inputs": text})
     if response.status_code == 200:
         return response.json()
     else:
