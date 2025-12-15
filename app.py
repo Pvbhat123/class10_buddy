@@ -14,7 +14,7 @@ app = Flask(__name__)
 # ---------------------------------------------
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 HF_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
-HF_API_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{HF_EMBEDDING_MODEL}"
+HF_API_URL = f"https://router.huggingface.co/hf-inference/pipeline/feature-extraction/{HF_EMBEDDING_MODEL}"
 
 def get_embedding(text):
     """Get embeddings using HuggingFace Inference API (free)"""
